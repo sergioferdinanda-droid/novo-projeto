@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Plataforma segura para aluguel de imóveis em Moçambique. Conecte proprietários e inquilinos diretamente.">
+  <meta name="keywords" content="aluguel, imóveis, Moçambique, casas, arrendamento, Maputo">
+  <meta name="author" content="Sergio Ferdinanda">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://alugaaqui.co.mz">
+  <title>AlugaAqui — Arrendamento sem boatos</title>
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+    /* Loading Screen */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-content {
+      text-align: center;
+      color: white;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+/* Modal Imagem */
+#modalImagem {
+  display: none; /* começa escondido */
+  position: fixed;
+  z-index: 1000;
+  padding-top: 60px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.8);
+}
+
+#modalImagem img {
+  margin: auto;
+  display: block;
+  max-width: 90%;
+  max-height: 80%;
+  border-radius: 10px;
+}
+
+#modalImagem span {
+  position: absolute;
+  top: 20px;
+  right: 35px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #333;
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+      opacity: 0.3;
+    }
+
+    header h1 {
+      position: relative;
+      z-index: 2;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      letter-spacing: -0.5px;
+    }
+
+    header img {
+      height: 140px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+      transition: transform 0.3s ease;
+    }
+
+    header img:hover {
+      transform: scale(1.05);
+    }
+
+    header p {
+      position: relative;
+      z-index: 2;
+      font-size: 20px;
+      font-weight: 300;
+      margin: 15px 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #menu-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s;
+    }
+
+    #menu-toggle:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.1);
+    }
+
+    .anuncio-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .anuncio-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    #quick-search:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 280px;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1001;
+      padding: 30px;
+      box-sizing: border-box;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    }
+
+    nav.open {
+      transform: translateX(0);
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 60px 0 0 0;
+      padding: 0;
+    }
+
+    nav li {
+      margin: 15px 0;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 15px 20px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateX(-5px);
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      z-index: 1000;
+      backdrop-filter: blur(2px);
+    }
+
+    #overlay.show {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        width: 250px;
+      }
+      .anuncios {
+        grid-template-columns: 1fr;
+      }
+      .filtros input, .filtros select {
+        width: 100%;
+        margin: 8px 0;
+      }
+    }
+
+    section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    h2 {
+      color: #667eea;
+      font-size: 32px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    h2::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      margin: 10px auto;
+      border-radius: 2px;
+    }
+
+    .anuncios {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+    }
+
+    .anuncio {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      padding: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid #e9ecef;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .anuncio::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .anuncio:hover::before {
+      transform: scaleX(1);
+    }
+
+    .anuncio:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .anuncio img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 0;
+      margin-bottom: 0;
+      transition: transform 0.4s ease;
+    }
+
+    .anuncio:hover img {
+      transform: scale(1.05);
+    }
+
+    .anuncio-content {
+      padding: 20px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 14px 28px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 8px 25px rgba(72, 187, 120, 0.5);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #667eea;
+      color: #667eea;
+      box-shadow: none;
+    }
+
+    .btn-outline:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    #mais-drawer {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    details {
+      margin-bottom: 15px;
+      border: 1px solid #e9ecef;
+      border-radius: 5px;
+      background: white;
+    }
+
+    summary {
+      padding: 15px;
+      background: #0a7cff;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+      list-style: none;
+      transition: background 0.3s;
+    }
+
+    summary:hover {
+      background: #0056b3;
+    }
+
+    summary::marker {
+      display: none;
+    }
+
+    summary::after {
+      content: " ▶";
+      float: right;
+      transform: rotate(0deg);
+      transition: transform 0.3s;
+    }
+
+    details[open] summary::after {
+      transform: rotate(90deg);
+    }
+
+    details > div {
+      padding: 15px;
+      border-top: 1px solid #e9ecef;
+    }
+
+    details details {
+      margin: 10px 0;
+      border: none;
+      background: #f8f9fa;
+    }
+
+    details details summary {
+      background: #6c757d;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    details details summary:hover {
+      background: #5a6268;
+    }
+
+    footer {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      color: #e2e8f0;
+      text-align: center;
+      padding: 40px 20px;
+      margin-top: 60px;
+      box-shadow: 0 -4px 6px rgba(0,0,0,0.1);
+    }
+
+    footer a {
+      color: #667eea;
+      text-decoration: none;
+      margin: 0 10px;
+      font-size: 24px;
+      transition: color 0.3s;
+    }
+
+    footer a:hover {
+      color: #764ba2;
+    }
+
+    footer p {
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 2px solid #e9ecef;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filtros {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .filtros::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .filtros input, .filtros select {
+      flex: 1;
+      min-width: 180px;
+      max-width: 220px;
+      padding: 12px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .filtros input:focus, .filtros select:focus {
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .trust-indicators {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .trust-indicator {
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 10px 15px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .trust-indicator::before {
+      content: "✓";
+      color: #48bb78;
+      font-size: 18px;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h2>Carregando AlugaAqui...</h2>
+      <p>Preparando a melhor experiência para você</p>
+    </div>
+  </div>
+
+<header>
+    <button id="menu-toggle" aria-label="Abrir menu de navegação">
+      <span class="sr-only">Menu</span>
+      ☰
+    </button>
+    
+    <img src="logo.png" alt="AlugaAqui - Plataforma de Arrendamento em Moçambique" loading="eager">
+    <h1>AlugaAqui</h1>
+    <p>Seu lar, direto do proprietário: seguro, transparente e confiável</p>
+  </header>
+
+<nav id="nav-menu">
+  <ul>
+    <li><a href="sobre.html"><i class="fas fa-info-circle"></i> Sobre Nós</a></li>
+    <li><a href="#casas"><i class="fas fa-home"></i> Casas Disponíveis</a></li>
+    <li><a href="#contacte"><i class="fas fa-envelope"></i> Contacte-nos</a></li>
+  </ul>
+</nav>
+
+<div id="overlay" aria-hidden="true"></div>
+
+  <main>
+
+<section id="sobre-nos">
+   <h2>Sobre Nós</h2>
+  <div style="text-align:center; margin-bottom:20px;">
+   
+  </div>
+  <div id="sobre-texto">
+    <p>O <b>AlugaAqui</b> nasceu da necessidade de tornar o arrendamento em Moçambique mais transparente e confiável. Muitos inquilinos perdem tempo e dinheiro com anúncios falsos ou boatos, e proprietários tinham dificuldade em divulgar suas casas de forma segura. Criamos esta plataforma para conectar proprietários e inquilinos diretamente, garantindo informações verificadas, fotos reais e comunicação segura, sem intermediários que possam gerar confusão ou golpes.</p> <p>“Chega de perder tempo e dinheiro com anúncios falsos. Encontre sua casa com segurança e confiança.”</p>
+  </div>
+  <div class="trust-indicators">
+    <div class="trust-indicator">Conexão Direta</div>
+    <div class="trust-indicator">Sem Comissão</div>
+    <div class="trust-indicator">Anúncios Verificados</div>
+    <div class="trust-indicator">Suporte 24/7</div>
+  </div></section>
+
+<button id="mais-btn" class="btn" onclick="toggleMais()" style="font-size:18px; padding:15px 30px;">Mais Informações</button>
+<div id="mais-drawer" style="display:none; margin-top:20px;">
+  <details>
+    <summary>POR QUE CRIAMOS O AlugaAqui</summary>
+    <div>
+      <p>Muitas pessoas deslocam-se para estudar, trabalhar ou passar férias. Encontrar casa é difícil. Golpes, boatos e intermediários complicam tudo. O AlugaAqui surge para simplificar e proteger.</p>
+    </div>
+  </details>
+  <details>
+    <summary>DICAS PARA EVITAR BURLAS NO ARRENDAMENTO</summary>
+    <div>
+      <ul>
+        <li>Nunca pague sem visitar a casa</li>
+        <li>Desconfie de preços muito abaixo do normal</li>
+        <li>Prefira contacto direto com o proprietário</li>
+        <li>Evite intermediários desconhecidos</li>
+      </ul>
+    </div>
+  </details>
+  <details>
+    <summary>ℹ️ MAIS INFORMACOES</summary>
+    <div>
+      <details>
+        <summary>Como funciona o AlugaAqui</summary>
+        <p>Conectamos proprietários e inquilinos diretamente via WhatsApp. Sem comissões.</p>
+      </details>
+      <details>
+        <summary>Segurança</summary>
+        <p>Verificamos anúncios e oferecemos ferramentas para reportar suspeitas.</p>
+      </details>
+      <details>
+        <summary>Contato</summary>
+        <p>Fale connosco pelo WhatsApp para dúvidas ou sugestões.</p>
+      </details>
+    </div>
+  </details>
+  <details>
+    <summary> Agradecimentos</summary>
+    <div>
+      <p>Agradecemos a todos que acreditam nesta iniciativa, aos proprietários que colaboram, e à comunidade que ajuda a construir um arrendamento mais justo e transparente no nosso Pais.</p>
+    </div>
+  </details>
+</div>
+
+<section id="casas">
+  <h2>Casas Temporariamente indisponíveis</h2>
+  <section style="background:#fff3cd; border:1px solid #ffeeba; padding:20px; border-radius:8px; margin:20px auto; max-width:1100px;">
+  <h3 style="color:#856404;">⚠️ Aviso Importante</h3>
+  <p>
+    O AlugaAqui encontra-se actualmente numa <strong>fase experimental</strong>.
+    As casas apresentadas nesta versão são <strong>fictícias</strong> e servem apenas
+    para demonstrar o funcionamento da plataforma.
+  </p>
+  <p>
+    <strong>És proprietário e queres anunciar a tua casa?</strong><br>
+    Envia as fotos e os dados pelo WhatsApp e ajuda-nos a construir uma plataforma
+    de arrendamento mais transparente em Moçambique.
+    O mesmo serve para <b>SUGESTOES PARA MELHORAR O NOSSO APLICATIVO</b>
+  </p>
+  <a href="https://wa.me/258857320579?text=Olá,+sou+proprietário+e+quero+anunciar+uma+casa+no+AlugaAqui"
+     class="btn">
+     Enviar pelo WhatsApp
+  </a>
+</section>
+
+  <div class="filtros" style="margin-bottom: 20px; text-align: center;">
+    <!-- Busca rápida -->
+    <div style="position: relative; display: inline-block; margin-bottom: 15px;">
+     
+   
+    </div>
+
+    <!-- Filtros avançados -->
+    <div style="border-top: 1px solid #eee; padding-top: 15px;">
+      <input type="text" id="filtro-local" placeholder="Localização (ex: Maputo)" style="padding: 10px; margin: 5px;">
+      <select id="filtro-tipo" style="padding: 10px; margin: 5px;">
+        <option value="">Todos os tipos</option>
+        <option value="Quarto">Quarto</option>
+        <option value="Casa T2">Casa T2</option>
+        <option value="Apartamento">Apartamento</option>
+      </select>
+      <input type="number" id="filtro-preco-min" placeholder="Preço mínimo" style="padding: 10px; margin: 5px;">
+      <input type="number" id="filtro-preco-max" placeholder="Preço máximo" style="padding: 10px; margin: 5px;">
+      <button id="btn-filtrar" class="btn">Filtrar</button>
+    </div>
+  </div>
+
+  <div class="anuncios" id="listaAnuncios"></div>
+</section>
+
+<section id="contacte">
+
+    <h2>Contacte-nos</h2>
+  <p>É proprietário e quer anunciar a sua casa?<br>Envie as fotos e dados pelo WhatsApp.</p>
+  <a class="btn" href="https://wa.me/258857320579?text=Olá,+quero+anunciar+uma+casa+no+AlugaAqui" target="_blank">Enviar mensagem pelo WhatsApp</a>
+  <form id="contact-form" style="max-width:600px; margin-top:30px;">
+   
+</section>
+  </main>
+
+<footer>
+  <div style="text-align: center; margin-bottom: 20px;">
+    <a href="https://www.facebook.com" target="_blank" style="margin: 0 10px;"><i class="fab fa-facebook-f" style="font-size: 24px; color: #0a7cff;"></i></a>
+    <a href="https://www.instagram.com" target="_blank" style="margin: 0 10px;"><i class="fab fa-instagram" style="font-size: 24px; color: #0a7cff;"></i></a>
+    <a href="https://wa.me/258857320579" target="_blank" style="margin: 0 10px;"><i class="fab fa-whatsapp" style="font-size: 24px; color: #0a7cff;"></i></a>
+    <a href="https://www.linkedin.com" target="_blank" style="margin: 0 10px;"><i class="fab fa-linkedin-in" style="font-size: 24px; color: #0a7cff;"></i></a>
+    <a href="https://www.twitter.com" target="_blank" style="margin: 0 10px;"><i class="fab fa-twitter" style="font-size: 24px; color: #0a7cff;"></i></a>
+  </div>
+  <p>Criado por: Sergio Ferdinanda</p>
+  <p>Contacto: +258 85 732 0579</p>
+  <p>&copy; 2026 AlugaAqui</p>
+</footer>
+
+<script>
+// Lista de anúncios com imagens, contacto, preço e localização
+let anuncios = [
+  { 
+    id: 1,
+    proprietario: "Sr. Delio Nhantumbo",
+    tipo: "Quarto",
+    local: "Maputo",
+    preco: 3000,
+    contacto: "840000000",
+    quartos: 1,
+    area: 25,
+    imagens: [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400"
+    ],
+    ultimaAtualizacao: "há 3 dias"
+  },
+  { 
+    id: 2,
+    proprietario: "Dona Ferdinanda",
+    tipo: "Casa T2",
+    local: "Inhambane",
+    preco: 8500,
+    contacto: "870000000",
+    quartos: 2,
+    area: 80,
+    imagens: [
+      "https://images.unsplash.com/photo-1572120360610-d971b9b78825?w=400",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400"
+    ],
+    ultimaAtualizacao: "há 1 semana"
+  },
+  { 
+    id: 3,
+    proprietario: "Sr. Carmon da Nanda",
+    tipo: "Apartamento",
+    local: "Maputo",
+    preco: 15000,
+    contacto: "860000000",
+    quartos: 3,
+    area: 120,
+    imagens: [
+      "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=400"
+    ],
+    ultimaAtualizacao: "há 5 dias"
+  }
+];
+
+// Função para criar os anúncios no HTML
+function renderAnuncios() {
+  const div = document.getElementById("listaAnuncios");
+  div.innerHTML = ""; // limpa a lista
+  anuncios.forEach((a, index) => {
+    // Incrementar contador de visualizações
+    let views = parseInt(localStorage.getItem(`views-${index}`)) || 0;
+    views++;
+    localStorage.setItem(`views-${index}`, views);
+    
+    // Cada imagem recebe onclick para abrir modal
+    let fotos = a.imagens.map(img => 
+      `<img src='${img}' alt='Casa para alugar em ${a.local}' onclick='abrirModal(this.src)' loading='lazy'>`
+    ).join('');
+    
+    div.innerHTML += `
+      <div class='anuncio'>
+        ${fotos}
+        <div class='anuncio-content'>
+          <div class='anuncio-header'>
+            <span class='badge'>${a.tipo}</span>
+            <div class='anuncio-actions'>
+              <button class='favorite-btn' data-property-id='${a.id}' onclick='toggleFavorite(${a.id})' title='Favoritar'>🤍</button>
+              <button onclick='shareProperty(${a.id})' title='Compartilhar' style='background: none; border: none; font-size: 18px; cursor: pointer; margin-left: 5px;'>📤</button>
+            </div>
+          </div>
+          <p><strong>Proprietário:</strong> ${a.proprietario}</p>
+          <p><strong>Localização:</strong> ${a.local}</p>
+          <p><strong>Quartos:</strong> ${a.quartos} | <strong>Área:</strong> ${a.area}m²</p>
+          <p><strong>Preço:</strong> ${a.preco} MZN</p>
+          <p><strong>Contacto:</strong> ${a.contacto}</p>
+          <p>👀 <span id="views-${index}">${views}</span> pessoas viram este anúncio</p>
+          <p>📅 Última atualização: ${a.ultimaAtualizacao}</p>
+          <a onclick="contactOwner(${index})" class="btn">Falar com o proprietário</a>
+        </div>
+      </div>`;
+  });
+  
+  // Atualizar botões de favorito após renderizar
+  updateFavoriteButtons();
+}
+
+// Funções para abrir e fechar o modal
+function abrirModal(src) {
+  document.getElementById('imgModal').src = src;
+  document.getElementById('modalImagem').style.display = 'block';
+}
+
+function fecharModal() {
+  document.getElementById('modalImagem').style.display = 'none';
+}
+
+// Função para toggle do menu
+document.getElementById('menu-toggle').addEventListener('click', function() {
+  const nav = document.getElementById('nav-menu');
+  const overlay = document.getElementById('overlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('show');
+});
+
+// Fechar o menu ao clicar no overlay
+document.getElementById('overlay').addEventListener('click', function() {
+  const nav = document.getElementById('nav-menu');
+  const overlay = document.getElementById('overlay');
+  nav.classList.remove('open');
+  overlay.classList.remove('show');
+});
+
+// Fechar o menu ao clicar em um link
+document.querySelectorAll('#nav-menu a').forEach(link => {
+  link.addEventListener('click', function() {
+    document.getElementById('nav-menu').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  });
+});
+
+// Funções para anúncios
+function contactOwner(index) {
+  const a = anuncios[index];
+  window.open(`https://wa.me/258${a.contacto}`, '_blank');
+}
+
+function toggleMais() {
+  const drawer = document.getElementById('mais-drawer');
+  drawer.style.display = drawer.style.display === 'none' ? 'block' : 'none';
+}
+
+// Mensagens contextuais
+window.addEventListener('load', function() {
+  // Remover loading screen
+  const loadingScreen = document.getElementById('loading-screen');
+  if (loadingScreen) {
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+    }, 500);
+  }
+
+  if (!sessionStorage.getItem('visited')) {
+    setTimeout(() => {
+      alert('Bem-vindo ao AlugaAqui. Aqui não cobramos comissão.');
+    }, 600);
+    sessionStorage.setItem('visited', 'true');
+  }
+});
+
+window.addEventListener('scroll', function() {
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+    if (!sessionStorage.getItem('scrolledToBottom')) {
+      alert('Não encontrou o que procura? Fale connosco no WhatsApp.');
+      sessionStorage.setItem('scrolledToBottom', 'true');
+    }
+  }
+});
+
+// Busca rápida por localização
+function quickSearch() {
+  const searchTerm = document.getElementById('quick-search').value.toLowerCase().trim();
+  if (!searchTerm) {
+    renderAnuncios();
+    return;
+  }
+
+  const filtered = anuncios.filter(anuncio =>
+    anuncio.local.toLowerCase().includes(searchTerm) ||
+    anuncio.tipo.toLowerCase().includes(searchTerm) ||
+    anuncio.descricao.toLowerCase().includes(searchTerm)
+  );
+
+  renderAnunciosFiltrados(filtered);
+}
+
+// Compartilhar imóvel
+function shareProperty(propertyId) {
+  const property = anuncios.find(a => a.id == propertyId);
+  if (!property) return;
+
+  const url = window.location.href;
+  const text = `Confira este imóvel: ${property.tipo} em ${property.local} - ${property.preco}MT`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: 'AlugaAqui - Imóvel',
+      text: text,
+      url: url
+    });
+  } else {
+    // Fallback para navegadores que não suportam Web Share API
+    const shareText = `${text}\n${url}`;
+    navigator.clipboard.writeText(shareText).then(() => {
+      alert('Link copiado para a área de transferência!');
+    });
+  }
+}
+
+// Função para compartilhar imóvel
+function shareProperty(index) {
+  const anuncio = anuncios[index];
+  const url = window.location.href;
+  const text = `Confira este imóvel: ${anuncio.tipo} em ${anuncio.local} por ${anuncio.preco}MT`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: 'AlugaAqui - Imóvel para Alugar',
+      text: text,
+      url: url
+    });
+  } else {
+    // Fallback para WhatsApp
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+    window.open(whatsappUrl, '_blank');
+  }
+}
+
+// Função para busca em tempo real
+function searchProperties() {
+  const searchTerm = document.getElementById('search-input').value.toLowerCase();
+  const cards = document.querySelectorAll('.anuncio-card');
+
+  cards.forEach(card => {
+    const title = card.querySelector('h3').textContent.toLowerCase();
+    const location = card.querySelector('.location').textContent.toLowerCase();
+
+    if (title.includes(searchTerm) || location.includes(searchTerm)) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// Função para voltar ao topo
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+
+// Função para mostrar/ocultar botão "voltar ao topo"
+function toggleScrollTopButton() {
+  const button = document.getElementById('scroll-top-btn');
+  if (window.scrollY > 300) {
+    button.style.display = 'block';
+  } else {
+    button.style.display = 'none';
+  }
+}
+
+// Inicializar funcionalidades leves
+document.addEventListener('DOMContentLoaded', function() {
+  // Adicionar listener para botão voltar ao topo
+  window.addEventListener('scroll', toggleScrollTopButton);
+});
+
+// Chama a função para renderizar os anúncios na página
+renderAnuncios();
+
+// Função para filtrar anúncios
+document.getElementById('btn-filtrar').addEventListener('click', function() {
+  const localFiltro = document.getElementById('filtro-local').value.toLowerCase();
+  const tipoFiltro = document.getElementById('filtro-tipo').value;
+  const precoMin = parseInt(document.getElementById('filtro-preco-min').value) || 0;
+  const precoMax = parseInt(document.getElementById('filtro-preco-max').value) || Infinity;
+
+  const filtrados = anuncios.filter(a => {
+    return (localFiltro === '' || a.local.toLowerCase().includes(localFiltro)) &&
+           (tipoFiltro === '' || a.tipo === tipoFiltro) &&
+           (a.preco >= precoMin && a.preco <= precoMax);
+  });
+
+  renderAnunciosFiltrados(filtrados);
+});
+
+function renderAnunciosFiltrados(filtrados) {
+  const div = document.getElementById("listaAnuncios");
+  div.innerHTML = "";
+  filtrados.forEach((a, index) => {
+    let views = parseInt(localStorage.getItem(`views-${index}`)) || 0;
+    views++;
+    localStorage.setItem(`views-${index}`, views);
+    
+    let fotos = a.imagens.map(img => 
+      `<img src='${img}' alt='Casa para alugar em ${a.local}' onclick='abrirModal(this.src)' loading='lazy'>`
+    ).join('');
+    
+    div.innerHTML += `
+      <div class='anuncio'>
+        ${fotos}
+        <div class='anuncio-content'>
+          <div class='anuncio-header'>
+            <span class='badge'>${a.tipo}</span>
+            <div class='anuncio-actions'>
+              <button class='favorite-btn' data-property-id='${a.id}' onclick='toggleFavorite(${a.id})' title='Favoritar'>🤍</button>
+              <button onclick='shareProperty(${a.id})' title='Compartilhar' style='background: none; border: none; font-size: 18px; cursor: pointer; margin-left: 5px;'>📤</button>
+            </div>
+          </div>
+          <p><strong>Proprietário:</strong> ${a.proprietario}</p>
+          <p><strong>Localização:</strong> ${a.local}</p>
+          <p><strong>Quartos:</strong> ${a.quartos} | <strong>Área:</strong> ${a.area}m²</p>
+          <p><strong>Preço:</strong> ${a.preco} MZN</p>
+          <p><strong>Contacto:</strong> ${a.contacto}</p>
+          <p>👀 <span id="views-${index}">${views}</span> pessoas viram este anúncio</p>
+          <p>📅 Última atualização: ${a.ultimaAtualizacao}</p>
+          <a onclick="contactOwner(${index})" class="btn">Falar com o proprietário</a>
+        </div>
+      </div>`;
+  });
+}
+</script>
+
+<div id="modalImagem">
+    <span onclick="fecharModal()">&times;</span>
+    <img id="imgModal" src="">
+</div>
+
+</body>
+</html>
+AIzaSyBQg345dS-wI-lhdALicUTdbr9AtOz2X_4
